@@ -1,1 +1,1 @@
-# attack-surface-cli
+# attack-surface-detector-cli
