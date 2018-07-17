@@ -4,13 +4,13 @@
 
 	
 	<groupId>com.github.secdec.astam-correlator</groupId>
-    <artifactId>threadfix-endpoint-cli</artifactId>
-    <name>threadfix-endpoint-cli</name>
+    <artifactId>attack-surface-detector-cli</artifactId>
+    <name>attack-surface-detector-cli</name>
 	<version>1.2.16</version>
 	
     <description>
-        This module is a thin wrapper around the threadfix-ham library used to build
-        the threadfix endpoints cli client.
+        This is a standalone tool that uses the ASTAM Correlator HAM module to detect endpoints from source code for
+		a variety of languages and frameworks. See the readme for more information.
     </description>
 
     <packaging>jar</packaging>
@@ -72,6 +72,11 @@
         </profile>
     </profiles>
     <dependencies>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.4</version>
+        </dependency>
         <dependency>
             <groupId>com.github.secdec.astam-correlator</groupId>
             <artifactId>threadfix-entities</artifactId>
