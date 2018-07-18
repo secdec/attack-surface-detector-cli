@@ -167,11 +167,6 @@ public class EndpointMain {
 
                             if (printFormat == SIMPLE_JSON || printFormat == FULL_JSON) {
                                 allEndpoints.addAll(generatedEndpoints);
-                            } else {
-                                int i = 0;
-                                for (Endpoint endpoint : generatedEndpoints) {
-                                    printEndpointWithVariants(i++, 0, endpoint);
-                                }
                             }
                         } else {
                             projectsMissingEndpoints.add(job.sourceCodePath.getAbsolutePath());
@@ -195,16 +190,20 @@ public class EndpointMain {
     	            compositeFrameworkTypes.add(defaultFramework);
                 }
 
-                Collection<Endpoint> newEndpoints = listEndpoints(rootFolder, list(defaultFramework));
+                println("Beginning endpoint detection for '" + rootFolder.getAbsolutePath() + "' with " + compositeFrameworkTypes.size() + " framework types");
+                for (FrameworkType subType : compositeFrameworkTypes) {
+                    println("Using framework=" + subType);
+                }
+
+                Collection<Endpoint> newEndpoints = listEndpoints(rootFolder, compositeFrameworkTypes);
+
+                println("Finished endpoint detection for '" + rootFolder.getAbsolutePath() + "'");
+                println(PRINTLN_SEPARATOR);
+
                 if (!newEndpoints.isEmpty()) {
                     ++numProjectsWithEndpoints;
                     if (printFormat == SIMPLE_JSON || printFormat == FULL_JSON) {
                         allEndpoints.addAll(newEndpoints);
-                    } else {
-                        int i = 0;
-                        for (Endpoint endpoint : newEndpoints) {
-                            printEndpointWithVariants(i++, 0, endpoint);
-                        }
                     }
                 } else {
                     projectsMissingEndpoints.add(rootFolder.getAbsolutePath());
@@ -238,10 +237,10 @@ public class EndpointMain {
                     }
                 } else {
                     int i = 0;
-                    for (Endpoint endpoint : allEndpoints) {
-                        //println(endpoint.getCSVLine(printFormat));
-                        i += printEndpointWithVariants(i, 0, endpoint);
-                    }
+//                    for (Endpoint endpoint : allEndpoints) {
+//                        //println(endpoint.getCSVLine(printFormat));
+//                        i += printEndpointWithVariants(i, 0, endpoint);
+//                    }
                 }
             }
 
@@ -424,6 +423,11 @@ public class EndpointMain {
         int numEndpoints = EndpointUtil.flattenWithVariants(endpoints).size();
 
         totalDetectedEndpoints += numEndpoints;
+
+        int i = 0;
+        for (Endpoint endpoint : endpoints) {
+            printEndpointWithVariants(i++, 0, endpoint);
+        }
 
         if (endpoints.isEmpty()) {
             println("No endpoints were found.");
