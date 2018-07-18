@@ -118,3 +118,10 @@ Endpoints without a line range will have their start and end lines set to `-1`. 
 - `SESSION` - A parameter stored as session data
 - `COOKIE` - A parameter stored as a cookie
 - `FILES` - A parameter for file uploads
+
+-----
+
+_*This material is based on research sponsored by the Department of Homeland
+Security (DHS) Science and Technology Directorate, Cyber Security Division
+(DHS S&T/CSD) via contract number HHSP233201600058C.*_
+
