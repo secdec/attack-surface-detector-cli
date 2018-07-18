@@ -1,12 +1,11 @@
 # attack-surface-detector-cli
 
-The `attack-surface-detector-cli` program is a command-line tool that takes in a folder location and outputs the set of endpoints detected within that codebase. [It uses the `threadfix-ham` module to generate these endpoints.](https://github.com/secdec/attack-surface-detector-cli/blob/master/threadfix-cli-endpoints/src/com/denimgroup/threadfix/cli/endpoints/EndpointMain.java#L268)
-
+The `attack-surface-detector-cli` program is a command-line tool that takes in a folder location and outputs the set of endpoints detected within that codebase. It uses the [ASTAM Correlator's](https://github.com/secdec/astam-correlator) `threadfix-ham` module to generate these endpoints.
 ## Usage
 
-Once compiled to a JAR, run the program with:
+Once you have a compiled JAR, run the program with:
 
-    java -jar attack-surface-detector-cli.jar <root-folder>
+    java -jar attack-surface-detector-cli.jar <root-folder> [-flags]
 
 If successful, you should see various output in the console regarding endpoints declared in the given code.
 
@@ -26,15 +25,16 @@ If successful, you should see various output in the console regarding endpoints 
     Generated 50 total parameters
     To enable logging include the -debug argument
 
-## Generating JSON
+## Saving to JSON
 
 The detected endpoints can be serialized and stored in a JSON file. This is done using the `-json` and `-output=...` parameters:
 
     > java -jar attack-surface-detector-cli.jar C:\...\SourceCode -json -output=C:\...\endpoints.json
     
-The default `json` format carries extra information and is intended to be used with the `threadfix-ham` module from the ASTAM Correlator through `com.denimgroup.threadfix.framework.engine.full.EndpointSerialization.deserializeAll(..)`. A simplified output can be created by using the `-simple-json` flag instead of `-json`. See the Options section below for more details.
+This `json` output carries extra information and is intended to be used with the `threadfix-ham` module from the ASTAM Correlator through `com.denimgroup.threadfix.framework.engine.full.EndpointSerialization.deserializeAll(..)`. A simplified output can be created by using the `-simple-json` flag instead of `-json`. See the Options section below for more details.
 
 ## Options
+
     <folder-path>
 Runs endpoint detection on code location in the given folder path. _(Required, unless -path-list-file=... is specified)_
 
@@ -96,7 +96,7 @@ For simplicity, this `jar` is referred to as `attack-surface-detector-cli.jar` t
 
 ## Debug Information
 
-The console output includes various debug information at the end of a scan for validation. This typically looks like:
+The console output can include various debug information at the end of a scan for validation. This typically looks like:
 
     Got an absolute file path when a relative path was expected instead, for: GET,/^(?P<i18>[\w\-_]+)/^admin/^mypageextension/$,{}
     Failed to validate serialization for at least one of these endpoints
