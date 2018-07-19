@@ -28,8 +28,10 @@ package com.denimgroup.threadfix.cli.endpoints;
 
 import com.denimgroup.threadfix.data.entities.RouteParameter;
 import com.denimgroup.threadfix.data.entities.RouteParameterType;
+import com.denimgroup.threadfix.data.entities.WildcardEndpointPathNode;
 import com.denimgroup.threadfix.data.enums.FrameworkType;
 import com.denimgroup.threadfix.data.interfaces.Endpoint;
+import com.denimgroup.threadfix.data.interfaces.EndpointPathNode;
 import com.denimgroup.threadfix.framework.engine.framework.FrameworkCalculator;
 import com.denimgroup.threadfix.framework.engine.full.EndpointDatabase;
 import com.denimgroup.threadfix.framework.engine.full.EndpointDatabaseFactory;
@@ -46,7 +48,9 @@ import org.apache.log4j.PatternLayout;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -73,6 +77,8 @@ public class EndpointMain {
 
     static int totalDetectedEndpoints = 0;
     static int totalDetectedParameters = 0;
+
+    static String testUrlPath = null;
 
     private static void println(String line) {
         if (printFormat != SIMPLE_JSON && printFormat != FULL_JSON) {
@@ -326,6 +332,9 @@ public class EndpointMain {
                         path = path.substring(0, path.length() - 1);
                     }
                     pathListFile = path;
+                } else if (arg.startsWith("-validation-server=")) {
+                    String[] parts = arg.split("=");
+                    testUrlPath = parts[1];
                 } else {
                     println("Received unsupported option " + arg + ", valid arguments are -lint, -debug, -simple-json, -json, -path-list-file, and -simple");
                     return false;
@@ -444,6 +453,46 @@ public class EndpointMain {
             println("Successfully validated serialization for these endpoints");
         } else {
             println("Failed to validate serialization for at least one of these endpoints");
+        }
+
+        if (testUrlPath != null) {
+            EndpointTester tester = new EndpointTester(testUrlPath);
+
+            println("Testing endpoints against server at: " + testUrlPath);
+
+            List<Endpoint> successfulEndpoints = list();
+            List<Endpoint> failedEndpoints = list();
+            List<Endpoint> allEndpoints = EndpointUtil.flattenWithVariants(endpoints);
+            for (Endpoint endpoint : allEndpoints) {
+                boolean skip = false;
+                for (EndpointPathNode node : endpoint.getUrlPathNodes()) {
+                    if (node.getClass().equals(WildcardEndpointPathNode.class)) {
+                        skip = true;
+                        break;
+                    }
+                }
+
+                if (skip) {
+                    continue;
+                }
+
+                try {
+                    tester.test(endpoint);
+                    successfulEndpoints.add(endpoint);
+                } catch (FileNotFoundException | UnknownHostException e) {
+                    failedEndpoints.add(endpoint);
+                } catch (IOException e) {
+                    if (e.getMessage().contains("HTTP")) {
+                        successfulEndpoints.add(endpoint);
+                    }
+                }
+            }
+
+            for (Endpoint endpoint : failedEndpoints) {
+                println("Failed: " + endpoint.getUrlPath() + "[" + endpoint.getHttpMethod() + "]");
+            }
+
+            println(successfulEndpoints.size() + "/" + (successfulEndpoints.size() + failedEndpoints.size()) + " endpoints were queryable");
         }
 
         int numMissingStartLine = 0;
