@@ -28,8 +28,10 @@ package com.denimgroup.threadfix.cli.endpoints;
 
 import com.denimgroup.threadfix.data.entities.RouteParameter;
 import com.denimgroup.threadfix.data.entities.RouteParameterType;
+import com.denimgroup.threadfix.data.entities.WildcardEndpointPathNode;
 import com.denimgroup.threadfix.data.enums.FrameworkType;
 import com.denimgroup.threadfix.data.interfaces.Endpoint;
+import com.denimgroup.threadfix.data.interfaces.EndpointPathNode;
 import com.denimgroup.threadfix.framework.engine.framework.FrameworkCalculator;
 import com.denimgroup.threadfix.framework.engine.full.EndpointDatabase;
 import com.denimgroup.threadfix.framework.engine.full.EndpointDatabaseFactory;
@@ -46,7 +48,9 @@ import org.apache.log4j.PatternLayout;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -73,6 +77,9 @@ public class EndpointMain {
 
     static int totalDetectedEndpoints = 0;
     static int totalDetectedParameters = 0;
+
+    static String testUrlPath = null;
+    static Credentials testCredentials = null;
 
     private static void println(String line) {
         if (printFormat != SIMPLE_JSON && printFormat != FULL_JSON) {
@@ -326,6 +333,28 @@ public class EndpointMain {
                         path = path.substring(0, path.length() - 1);
                     }
                     pathListFile = path;
+                } else if (arg.startsWith("-validation-server=")) {
+                    String[] parts = arg.split("=");
+                    testUrlPath = parts[1];
+                } else if (arg.startsWith("-validation-server-auth=")) {
+                    arg = arg.substring("-validation-server-auth=".length());
+                    String[] parts = arg.split(";");
+                    testCredentials = new Credentials();
+                    testCredentials.parameters = map();
+
+                    for (String part : parts) {
+                        if (testCredentials.authenticationEndpoint == null) {
+                            testCredentials.authenticationEndpoint = part;
+                        } else {
+                            String[] paramParts = part.split("=");
+                            if (paramParts.length != 2) {
+                                println("Invalid authentication parameter format: " + part);
+                            } else {
+                                testCredentials.parameters.put(paramParts[0], paramParts[1]);
+                            }
+                        }
+                    }
+
                 } else {
                     println("Received unsupported option " + arg + ", valid arguments are -lint, -debug, -simple-json, -json, -path-list-file, and -simple");
                     return false;
@@ -444,6 +473,64 @@ public class EndpointMain {
             println("Successfully validated serialization for these endpoints");
         } else {
             println("Failed to validate serialization for at least one of these endpoints");
+        }
+
+        //  Run endpoint testing against a given server
+        if (testUrlPath != null) {
+            EndpointTester tester = new EndpointTester(testUrlPath);
+
+            println("Testing endpoints against server at: " + testUrlPath);
+
+            if (testCredentials != null) {
+                try {
+                    if (tester.authorize(testCredentials, null) < 400) {
+                        println("Successfully authenticated");
+                    }
+                } catch (IOException e) {
+                    println("Warning - unable to authorize against server");
+                }
+            }
+
+            List<Endpoint> successfulEndpoints = list();
+            List<Endpoint> failedEndpoints = list();
+            List<Endpoint> allEndpoints = EndpointUtil.flattenWithVariants(endpoints);
+            for (Endpoint endpoint : allEndpoints) {
+                boolean skip = false;
+                for (EndpointPathNode node : endpoint.getUrlPathNodes()) {
+                    if (node.getClass().equals(WildcardEndpointPathNode.class)) {
+                        skip = true;
+                        break;
+                    }
+                }
+
+                if (skip) {
+                    continue;
+                }
+
+                try {
+                    int responseCode = tester.test(endpoint, testCredentials);
+                    if (responseCode != 404) {
+                        successfulEndpoints.add(endpoint);
+                    } else {
+                        failedEndpoints.add(endpoint);
+                    }
+                } catch (IOException e) {
+                    //  Any non-404 error is considered "successful", since any other 4xx or 5xx may indicate
+                    //  that the endpoint exists but incorrect parameters were provided
+                    if (e.getMessage().contains("Server returned HTTP response code") && !e.getMessage().contains("code: 404")) {
+                        successfulEndpoints.add(endpoint);
+                    } else {
+                        failedEndpoints.add(endpoint);
+                    }
+                }
+            }
+
+            for (Endpoint endpoint : failedEndpoints) {
+                println("Failed: " + endpoint.getUrlPath() + "[" + endpoint.getHttpMethod() + "]");
+            }
+
+            println(successfulEndpoints.size() + "/" + (successfulEndpoints.size() + failedEndpoints.size()) + " endpoints were queryable");
+            println("(" + (allEndpoints.size() - successfulEndpoints.size() - failedEndpoints.size()) + " endpoints skipped since they had a wildcard in the URL)");
         }
 
         int numMissingStartLine = 0;
