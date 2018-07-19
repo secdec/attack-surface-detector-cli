@@ -79,6 +79,7 @@ public class EndpointMain {
     static int totalDetectedParameters = 0;
 
     static String testUrlPath = null;
+    static Credentials testCredentials = null;
 
     private static void println(String line) {
         if (printFormat != SIMPLE_JSON && printFormat != FULL_JSON) {
@@ -335,6 +336,25 @@ public class EndpointMain {
                 } else if (arg.startsWith("-validation-server=")) {
                     String[] parts = arg.split("=");
                     testUrlPath = parts[1];
+                } else if (arg.startsWith("-validation-server-auth=")) {
+                    arg = arg.substring("-validation-server-auth=".length());
+                    String[] parts = arg.split(";");
+                    testCredentials = new Credentials();
+                    testCredentials.parameters = map();
+
+                    for (String part : parts) {
+                        if (testCredentials.authenticationEndpoint == null) {
+                            testCredentials.authenticationEndpoint = part;
+                        } else {
+                            String[] paramParts = part.split("=");
+                            if (paramParts.length != 2) {
+                                println("Invalid authentication parameter format: " + part);
+                            } else {
+                                testCredentials.parameters.put(paramParts[0], paramParts[1]);
+                            }
+                        }
+                    }
+
                 } else {
                     println("Received unsupported option " + arg + ", valid arguments are -lint, -debug, -simple-json, -json, -path-list-file, and -simple");
                     return false;
@@ -455,10 +475,21 @@ public class EndpointMain {
             println("Failed to validate serialization for at least one of these endpoints");
         }
 
+        //  Run endpoint testing against a given server
         if (testUrlPath != null) {
             EndpointTester tester = new EndpointTester(testUrlPath);
 
             println("Testing endpoints against server at: " + testUrlPath);
+
+            if (testCredentials != null) {
+                try {
+                    if (tester.authorize(testCredentials, null) < 400) {
+                        println("Successfully authenticated");
+                    }
+                } catch (IOException e) {
+                    println("Warning - unable to authorize against server");
+                }
+            }
 
             List<Endpoint> successfulEndpoints = list();
             List<Endpoint> failedEndpoints = list();
@@ -477,13 +508,19 @@ public class EndpointMain {
                 }
 
                 try {
-                    tester.test(endpoint);
-                    successfulEndpoints.add(endpoint);
-                } catch (FileNotFoundException | UnknownHostException e) {
-                    failedEndpoints.add(endpoint);
-                } catch (IOException e) {
-                    if (e.getMessage().contains("HTTP")) {
+                    int responseCode = tester.test(endpoint, testCredentials);
+                    if (responseCode != 404) {
                         successfulEndpoints.add(endpoint);
+                    } else {
+                        failedEndpoints.add(endpoint);
+                    }
+                } catch (IOException e) {
+                    //  Any non-404 error is considered "successful", since any other 4xx or 5xx may indicate
+                    //  that the endpoint exists but incorrect parameters were provided
+                    if (e.getMessage().contains("Server returned HTTP response code") && !e.getMessage().contains("code: 404")) {
+                        successfulEndpoints.add(endpoint);
+                    } else {
+                        failedEndpoints.add(endpoint);
                     }
                 }
             }
@@ -493,6 +530,7 @@ public class EndpointMain {
             }
 
             println(successfulEndpoints.size() + "/" + (successfulEndpoints.size() + failedEndpoints.size()) + " endpoints were queryable");
+            println("(" + (allEndpoints.size() - successfulEndpoints.size() - failedEndpoints.size()) + " endpoints skipped since they had a wildcard in the URL)");
         }
 
         int numMissingStartLine = 0;
