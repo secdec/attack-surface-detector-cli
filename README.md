@@ -84,6 +84,21 @@ If multiple projects are scanned at once, the JSON output will contain a single 
     -output=...
 Specifies an output file that endpoints will be written to when using JSON serialization. This requires either `-json` or `-simple-json` to also be set, otherwise this flag has no effect.
 
+
+***
+
+    -validation-server=http://localhost:1234/abc...
+Specifies a base URL path that will be used and queried against to test all detected endpoints. Endpoints that return `404` will be marked as "failed" and listed in the terminal.
+
+***
+
+    - validation-server-auth=<login-endpoint>;usename=foo;password=bar;...
+Specifies how to authenticate against the server provided with `-validation-server`. Arguments are separated by semicolons `;`. The first argument will be the endpoint to use for authentication. Subsequent arguments will be sent to the endpoint while authenticating.
+
+The specified endpoint will be POSTed to, and the provided query parameters will be encoded as Form parameters. Result of authentication will be output in the console.
+
+Any cookies found in the response will be attached to all subsequent requests during testing.
+
 ## Build Instructions
 The module can be built with maven:
 
