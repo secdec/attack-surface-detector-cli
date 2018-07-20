@@ -15,3 +15,7 @@ This tool supports the following frameworks, as supported by the `threadfix-ham`
 ---
 
 Licensed under the [MPL](https://github.com/secdec/attack-surface-detector-cli/blob/master/LICENSE.md) License.
+
+---
+
+_This material is based on research sponsored by the Department of Homeland Security (DHS) Science and Technology Directorate, Cyber Security Division (DHS S&T/CSD) via contract number HHSP233201600058C._
