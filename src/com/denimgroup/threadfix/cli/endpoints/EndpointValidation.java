@@ -10,8 +10,12 @@ import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+
+import static com.denimgroup.threadfix.CollectionUtils.list;
 
 public class EndpointValidation {
 
@@ -19,6 +23,14 @@ public class EndpointValidation {
 
     public static boolean validateSerialization(File sourceCodeFolder, List<Endpoint> endpoints) {
         List<Endpoint> allEndpoints = EndpointUtil.flattenWithVariants(endpoints);
+
+        List<List<Endpoint>> duplicateEndpoints = detectDuplicates(endpoints);
+        if (!duplicateEndpoints.isEmpty()) {
+            logger.warn("Found " + duplicateEndpoints.size() + " duplicated endpoints:");
+            for (List<Endpoint> duplicateSet : duplicateEndpoints) {
+                logger.warn("- " + duplicateSet.size() + ": " + duplicateSet.get(0).toString());
+            }
+        }
 
         try {
             String serializedCollection = EndpointSerialization.serializeAll(allEndpoints);
@@ -151,6 +163,78 @@ public class EndpointValidation {
 	        testStructure.acceptAllEndpoints(endpoints);
         } catch (Exception e) {
         	System.out.println("Failed to validate endpoint structure generation due to an exception: \n" + e);
+        }
+
+        return true;
+    }
+
+    private static List<List<Endpoint>> detectDuplicates(Collection<Endpoint> endpoints) {
+        List<List<Endpoint>> duplicates = new ArrayList<>();
+
+        for (Endpoint main : endpoints) {
+            //  Check if we already know that this endpoint has duplicates
+            boolean wasChecked = false;
+            for (List<Endpoint> duplicatesSet : duplicates) {
+                if (endpointsMatch(main, duplicatesSet.get(0))) {
+                    wasChecked = true;
+                    break;
+                }
+            }
+            if (wasChecked) {
+                continue;
+            }
+
+            List<Endpoint> currentDuplicates = list();
+
+            for (Endpoint other : endpoints) {
+                if (endpointsMatch(main, other)) {
+                    currentDuplicates.add(other);
+                }
+            }
+
+            if (currentDuplicates.size() > 1) {
+                duplicates.add(currentDuplicates);
+            }
+        }
+
+        return duplicates;
+    }
+
+    private static boolean endpointsMatch(Endpoint a, Endpoint b) {
+        return
+            a.getUrlPath().equals(b.getUrlPath()) &&
+            a.getHttpMethod().equals(b.getHttpMethod()) &&
+            a.getFilePath().equals(b.getFilePath()) &&
+            a.getStartingLineNumber() == b.getStartingLineNumber() &&
+            a.getEndingLineNumber() == b.getEndingLineNumber() &&
+            endpointParametersMatch(a, b);
+    }
+
+    private static boolean endpointParametersMatch(Endpoint a, Endpoint b) {
+        Map<String, RouteParameter> bParams = b.getParameters();
+        for (Map.Entry<String, RouteParameter> param : a.getParameters().entrySet()) {
+            if (!bParams.containsKey(param.getKey()))
+                return false;
+
+            RouteParameter aParam = param.getValue();
+            RouteParameter bParam = bParams.get(param.getKey());
+
+            if (
+                aParam.getParamType() != bParam.getParamType() ||
+                aParam.getDataType() != bParam.getDataType() ||
+                (aParam.getAcceptedValues() == null) != (bParam.getAcceptedValues() == null)
+            ) {
+                return false;
+            }
+
+            if (
+                aParam.getAcceptedValues() != null && !(
+                    aParam.getAcceptedValues().containsAll(bParam.getAcceptedValues()) ||
+                    bParam.getAcceptedValues().containsAll(aParam.getAcceptedValues())
+                )
+            ) {
+                return false;
+            }
         }
 
         return true;
