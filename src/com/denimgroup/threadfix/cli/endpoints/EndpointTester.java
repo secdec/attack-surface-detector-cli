@@ -86,7 +86,7 @@ public class EndpointTester {
             e.printStackTrace();
         }
 
-        return -1;
+        return 0xffff;
     }
 
     private boolean saveCredentialsResponse(HttpURLConnection conn, Credentials creds) {
