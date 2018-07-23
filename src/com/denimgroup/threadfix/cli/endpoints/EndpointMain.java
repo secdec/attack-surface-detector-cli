@@ -448,6 +448,11 @@ public class EndpointMain {
             endpoints.addAll(db.generateEndpoints());
         }
 
+        //  Don't do any validation if we're just writing JSON without any output
+        if (printFormat == FULL_JSON || printFormat == SIMPLE_JSON) {
+            return endpoints;
+        }
+
         int numPrimaryEndpoints = endpoints.size();
         int numEndpoints = EndpointUtil.flattenWithVariants(endpoints).size();
 
