@@ -24,14 +24,6 @@ public class EndpointValidation {
     public static boolean validateSerialization(File sourceCodeFolder, List<Endpoint> endpoints) {
         List<Endpoint> allEndpoints = EndpointUtil.flattenWithVariants(endpoints);
 
-        List<List<Endpoint>> duplicateEndpoints = detectDuplicates(endpoints);
-        if (!duplicateEndpoints.isEmpty()) {
-            logger.warn("Found " + duplicateEndpoints.size() + " duplicated endpoints:");
-            for (List<Endpoint> duplicateSet : duplicateEndpoints) {
-                logger.warn("- " + duplicateSet.size() + ": " + duplicateSet.get(0).toString());
-            }
-        }
-
         try {
             String serializedCollection = EndpointSerialization.serializeAll(allEndpoints);
             Endpoint[] deserializedCollection = EndpointSerialization.deserializeAll(serializedCollection);
@@ -166,6 +158,19 @@ public class EndpointValidation {
         }
 
         return true;
+    }
+
+    public static boolean validateDuplicates(Collection<Endpoint> endpoints) {
+    	boolean validated = true;
+	    List<List<Endpoint>> duplicateEndpoints = detectDuplicates(endpoints);
+	    if (!duplicateEndpoints.isEmpty()) {
+		    logger.warn("Found " + duplicateEndpoints.size() + " duplicated endpoints:");
+		    for (List<Endpoint> duplicateSet : duplicateEndpoints) {
+			    logger.warn("- " + duplicateSet.size() + ": " + duplicateSet.get(0).toString());
+			    validated = false;
+		    }
+	    }
+	    return validated;
     }
 
     private static List<List<Endpoint>> detectDuplicates(Collection<Endpoint> endpoints) {

@@ -80,6 +80,8 @@ public class EndpointMain {
     static int totalDetectedParameters = 0;
     static int totalDistinctParameters = 0;
 
+    static int numProjectsWithDuplicates = 0;
+
     static String testUrlPath = null;
     static Credentials testCredentials = null;
 
@@ -244,18 +246,15 @@ public class EndpointMain {
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
-                } else {
-                    int i = 0;
-//                    for (Endpoint endpoint : allEndpoints) {
-//                        //println(endpoint.getCSVLine(printFormat));
-//                        i += printEndpointWithVariants(i, 0, endpoint);
-//                    }
                 }
             }
 
 
 
             println("-- DONE --");
+
+            println(numProjectsWithDuplicates + " projects had duplicate endpoints");
+
             println("Generated " + totalDistinctEndpoints + " distinct endpoints");
             println("Generated " + totalDetectedEndpoints + " total endpoints");
             println("Generated " + totalDistinctParameters + " distinct parameters");
@@ -485,6 +484,10 @@ public class EndpointMain {
             println("Successfully validated serialization for these endpoints");
         } else {
             println("Failed to validate serialization for at least one of these endpoints");
+        }
+
+        if (!EndpointValidation.validateDuplicates(endpoints)) {
+        	numProjectsWithDuplicates++;
         }
 
         //  Run endpoint testing against a given server
