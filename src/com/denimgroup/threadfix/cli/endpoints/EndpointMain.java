@@ -76,7 +76,9 @@ public class EndpointMain {
     static String outputFilePath = null;
 
     static int totalDetectedEndpoints = 0;
+    static int totalDistinctEndpoints = 0;
     static int totalDetectedParameters = 0;
+    static int totalDistinctParameters = 0;
 
     static String testUrlPath = null;
     static Credentials testCredentials = null;
@@ -254,7 +256,9 @@ public class EndpointMain {
 
 
             println("-- DONE --");
+            println("Generated " + totalDistinctEndpoints + " distinct endpoints");
             println("Generated " + totalDetectedEndpoints + " total endpoints");
+            println("Generated " + totalDistinctParameters + " distinct parameters");
             println("Generated " + totalDetectedParameters + " total parameters");
             println(numProjectsWithEndpoints + "/" + numProjects + " projects had endpoints generated");
             if (!projectsMissingEndpoints.isEmpty()) {
@@ -453,10 +457,13 @@ public class EndpointMain {
             return endpoints;
         }
 
+        List<Endpoint> allEndpoints = EndpointUtil.flattenWithVariants(endpoints);
+
         int numPrimaryEndpoints = endpoints.size();
-        int numEndpoints = EndpointUtil.flattenWithVariants(endpoints).size();
+        int numEndpoints = allEndpoints.size();
 
         totalDetectedEndpoints += numEndpoints;
+        totalDistinctEndpoints += numPrimaryEndpoints;
 
         int i = 0;
         for (Endpoint endpoint : endpoints) {
@@ -498,7 +505,6 @@ public class EndpointMain {
 
             List<Endpoint> successfulEndpoints = list();
             List<Endpoint> failedEndpoints = list();
-            List<Endpoint> allEndpoints = EndpointUtil.flattenWithVariants(endpoints);
             for (Endpoint endpoint : allEndpoints) {
                 boolean skip = false;
                 for (EndpointPathNode node : endpoint.getUrlPathNodes()) {
@@ -557,20 +563,27 @@ public class EndpointMain {
         println(numMissingEndLine + " endpoints were missing code end line");
         println(numSameLineRange + " endpoints had the same code start and end line");
 
-        List<RouteParameter> detectedParameters = list();
+        List<RouteParameter> distinctParameters = list();
         for (Endpoint endpoint : endpoints) {
-            detectedParameters.addAll(endpoint.getParameters().values());
+            distinctParameters.addAll(endpoint.getParameters().values());
         }
 
-        totalDetectedParameters += detectedParameters.size();
+        int numTotalParameters = 0;
+        for (Endpoint endpoint : allEndpoints) {
+            numTotalParameters += endpoint.getParameters().size();
+        }
 
-        println("Generated " + detectedParameters.size() + " parameters");
+        totalDistinctParameters += distinctParameters.size();
+        totalDetectedParameters += numTotalParameters;
+
+        println("Generated " + distinctParameters.size() + " distinct parameters");
+        println("Generated " + numTotalParameters + " total parameters");
 
         Map<RouteParameterType, Integer> typeOccurrences = map();
         int numHaveDataType = 0;
         int numHaveParamType = 0;
         int numHaveAcceptedValues = 0;
-        for (RouteParameter param : detectedParameters) {
+        for (RouteParameter param : distinctParameters) {
             if (param.getDataType() != null) {
                 ++numHaveDataType;
             }
@@ -589,7 +602,7 @@ public class EndpointMain {
             }
         }
 
-        int numParams = detectedParameters.size();
+        int numParams = distinctParameters.size();
         println("- " + numHaveDataType + "/" + numParams + " have their data type");
         println("- " + numHaveAcceptedValues + "/" + numParams + " have a list of accepted values");
         println("- " + numHaveParamType + "/" + numParams + " have their parameter type");
