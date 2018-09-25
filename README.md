@@ -1,6 +1,6 @@
 # attack-surface-detector-cli
 
-### _[Latest Release - 1.2.18](https://github.com/secdec/attack-surface-detector-cli/releases/tag/v1.2.18)_
+### _[Latest Release - 1.3.0](https://github.com/secdec/attack-surface-detector-cli/releases/tag/v1.3.0)_
 
 The `attack-surface-detector-cli` program is a command-line tool that takes in a folder location and outputs the set of endpoints detected within that codebase. It uses the [ASTAM Correlator's](https://github.com/secdec/astam-correlator) `threadfix-ham` module to generate these endpoints. The endpoints are output to the console by default, and can save a JSON version of those endpoints through the `-output-file` and `-json` flags. See the [Wiki](https://github.com/secdec/attack-surface-detector-cli/wiki/Usage,-Parameters,-and-Output) for more details.
 
