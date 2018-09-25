@@ -303,9 +303,9 @@ public class EndpointMain {
                 } else if (arg.equals("-lint")) {
                     printFormat = Endpoint.PrintFormat.LINT;
                 } else if (arg.equals("-json")) {
-                    printFormat = FULL_JSON;
-                } else if (arg.equals("-simple-json")) {
                     printFormat = SIMPLE_JSON;
+                } else if (arg.equals("-full-json")) {
+                    printFormat = FULL_JSON;
                 } else if (arg.contains(FRAMEWORK_COMMAND)) {
                     String frameworkName = arg.substring(arg.indexOf(
                             FRAMEWORK_COMMAND) + FRAMEWORK_COMMAND.length(), arg.length());
@@ -357,9 +357,11 @@ public class EndpointMain {
                             }
                         }
                     }
-
+                } else if (arg.equalsIgnoreCase("-help")) {
+                    printHelp();
+                    return false;
                 } else {
-                    println("Received unsupported option " + arg + ", valid arguments are -lint, -debug, -simple-json, -json, -path-list-file, and -simple");
+                    println("Received unsupported option " + arg + ", run with -help to see available flags.");
                     return false;
                 }
             }
@@ -374,7 +376,15 @@ public class EndpointMain {
     }
 
     static void printError() {
-        println("The first argument should be a valid file path to scan. Other flags supported: -lint, -debug, -simple-json, -json, -path-list-file=..., -output-file=..., -simple");
+        println("The first argument should be a valid file path to scan. Run with -help to see available flags and usage.");
+    }
+
+    static void printHelp() {
+        StringBuilder helpMessage = new StringBuilder();
+
+        helpMessage.append("Attack Surface Detector CLI Tool");
+
+        println(helpMessage.toString());
     }
 
     private static int printEndpointWithVariants(int i, int currentDepth, Endpoint endpoint) {
