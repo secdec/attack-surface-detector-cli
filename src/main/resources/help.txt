@@ -1,0 +1,53 @@
+Attack Surface Detector CLI
+https://github.com/secdec/attack-surface-detector-cli
+
+A tool to detect endpoints from source code. Can output these endpoints in multiple JSON formats,
+or output to the console (by default) to inspect the quality and coverage of the detected endpoints.
+
+Usage:
+    java -jar attack-surface-detector-cli.jar <source-code-path> [flags]
+
+Flags:
+    -debug                           -- Print debug information during endpoint detection
+
+    -simple                          -- Print only endpoint detection summary, without the full list
+                                        of detected endpoints
+
+    -path-list-file=<PATH>           -- Detect endpoints from all source code paths listed in the given file
+
+    -defaultFramework=<FRAMEWORK>    -- Parse the source code using the given framework type
+                                        Available values:
+                                           DETECT              : Attempt to automatically detect the framework
+                                           JSP                 : Java JSP/Servlets
+                                           SPRING_MVC          : Java Spring MVC
+                                           STRUTS              : Java Struts
+                                           DOT_NET_MVC         : ASP.NET MVC/WebAPI
+                                           DOT_NET_WEB_FORMS   : ASP.NET Web Forms
+                                           PYTHON              : Django
+                                           Rails               : Ruby on Rails
+
+    -help                            -- Displays this message
+
+[JSON Output]
+    -json                            -- Print only simple-format JSON to the console
+                                        Simple-format JSON uses a common format for all generated endpoints
+                                        regardless of framework.
+
+    -full-json                       -- Print full JSON information to the console
+                                        Full-format JSON uses unique data formats depending on the framework
+                                        that declared the endpoints. Should be used with the
+                                        astam-correlator.threadfix-ham module available on Maven.
+
+    -output-file=<PATH>              -- Writes generated JSON to the specified file path.
+                                        Must be used with the -json or -full-json flags; otherwise, has no effect.
+
+
+
+[Quality Testing]
+    -validation-server=<BASE_URL>    -- Run HTTP requests against the detected endpoints relative to the
+                                        given BASE_URL; ie http://localhost:8080/mywebapp
+
+    -validation-server-auth=<CREDS>  -- Use the given HTTP headers when validating endpoints against
+                                        a test server. Takes the format: "HEADER=VALUE;HEADER=VALUE;..."
+                                        Must be used with the -validation-server flag; otherwise, has
+                                        no effect.

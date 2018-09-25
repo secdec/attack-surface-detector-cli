@@ -16,8 +16,8 @@
     <packaging>jar</packaging>
 
     <build>
-        <sourceDirectory>src</sourceDirectory>
-		        <pluginManagement>
+        <sourceDirectory>src/main/java</sourceDirectory>
+        <pluginManagement>
             <plugins>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>

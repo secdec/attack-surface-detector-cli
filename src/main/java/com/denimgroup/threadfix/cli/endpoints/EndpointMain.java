@@ -40,6 +40,7 @@ import com.denimgroup.threadfix.framework.engine.full.TemporaryExtractionLocatio
 import com.denimgroup.threadfix.framework.util.EndpointUtil;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
@@ -47,9 +48,7 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 import org.codehaus.jackson.map.ObjectMapper;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.List;
@@ -359,7 +358,7 @@ public class EndpointMain {
                     }
                 } else if (arg.equalsIgnoreCase("-help")) {
                     printHelp();
-                    return false;
+                    System.exit(0);
                 } else {
                     println("Received unsupported option " + arg + ", run with -help to see available flags.");
                     return false;
@@ -380,11 +379,13 @@ public class EndpointMain {
     }
 
     static void printHelp() {
-        StringBuilder helpMessage = new StringBuilder();
-
-        helpMessage.append("Attack Surface Detector CLI Tool");
-
-        println(helpMessage.toString());
+        InputStream helpFileStream = EndpointMain.class.getResourceAsStream("/help.txt");
+        try {
+            String helpInfo = IOUtils.toString(helpFileStream);
+            println(helpInfo);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private static int printEndpointWithVariants(int i, int currentDepth, Endpoint endpoint) {
