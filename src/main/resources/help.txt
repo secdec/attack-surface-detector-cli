@@ -47,7 +47,16 @@ Flags:
     -validation-server=<BASE_URL>    -- Run HTTP requests against the detected endpoints relative to the
                                         given BASE_URL; ie http://localhost:8080/mywebapp
 
-    -validation-server-auth=<CREDS>  -- Use the given HTTP headers when validating endpoints against
-                                        a test server. Takes the format: "HEADER=VALUE;HEADER=VALUE;..."
-                                        Must be used with the -validation-server flag; otherwise, has
+    -validation-server-auth=<CREDS>  -- Use the given form data values to authenticate when validating endpoints against
+                                        a test server. Takes the format:
+
+                                           "AUTH-ENDPOINT;HEADER=VALUE;HEADER=VALUE;..."
+
+                                        ie:
+
+                                           "/login;username=user;password=pass"
+
+                                        The "/login" endpoint is queried with "username=user&password=pass" as form
+                                        data. Any "Set-Cookie" headers in the response are used in later requests
+                                        during testing. Must be used with the -validation-server flag; otherwise, has
                                         no effect.
