@@ -31,7 +31,9 @@ Flags:
 [JSON Output]
     -json                            -- Print only simple-format JSON to the console
                                         Simple-format JSON uses a common format for all generated endpoints
-                                        regardless of framework.
+                                        regardless of framework. Source code information is not included.
+
+    -keep-source                     -- Include source code information when combined with the -json flag
 
     -full-json                       -- Print full JSON information to the console
                                         Full-format JSON uses unique data formats depending on the framework

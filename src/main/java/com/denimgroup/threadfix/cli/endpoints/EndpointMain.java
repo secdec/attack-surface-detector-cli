@@ -73,6 +73,7 @@ public class EndpointMain {
     static boolean simplePrint = false;
     static String pathListFile = null;
     static String outputFilePath = null;
+    static boolean cleanSourceCode = true;
 
     static int totalDetectedEndpoints = 0;
     static int totalDistinctEndpoints = 0;
@@ -309,6 +310,8 @@ public class EndpointMain {
                     String frameworkName = arg.substring(arg.indexOf(
                             FRAMEWORK_COMMAND) + FRAMEWORK_COMMAND.length(), arg.length());
                     defaultFramework = FrameworkType.getFrameworkType(frameworkName);
+                } else if (arg.contains("-keep-source")) {
+                    cleanSourceCode = false;
                 } else if (arg.equals("-simple")) {
                     simplePrint = true;
                 } else if (arg.startsWith("-output-file=")) {
@@ -636,7 +639,7 @@ public class EndpointMain {
         Endpoint.Info[] endpointsInfos = new Endpoint.Info[allEndpoints.size()];
 
         for (int i = 0; i < allEndpoints.size(); i++) {
-            endpointsInfos[i] = Endpoint.Info.fromEndpoint(allEndpoints.get(i));
+            endpointsInfos[i] = Endpoint.Info.fromEndpoint(allEndpoints.get(i), !cleanSourceCode);
         }
 
         return endpointsInfos;
