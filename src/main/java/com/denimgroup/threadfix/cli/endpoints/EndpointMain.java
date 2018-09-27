@@ -478,9 +478,11 @@ public class EndpointMain {
         totalDetectedEndpoints += numEndpoints;
         totalDistinctEndpoints += numPrimaryEndpoints;
 
-        int i = 0;
-        for (Endpoint endpoint : endpoints) {
-            printEndpointWithVariants(i++, 0, endpoint);
+        if (!simplePrint) {
+            int i = 0;
+            for (Endpoint endpoint : endpoints) {
+                printEndpointWithVariants(i++, 0, endpoint);
+            }
         }
 
         if (endpoints.isEmpty()) {
