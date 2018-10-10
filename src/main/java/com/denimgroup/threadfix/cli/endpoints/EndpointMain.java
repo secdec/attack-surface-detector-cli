@@ -190,15 +190,15 @@ public class EndpointMain {
                     printError();
                 }
             } else {
-    	        ++numProjects;
+                ++numProjects;
 
-    	        File rootFolder = new File(args[0]);
+                File rootFolder = new File(args[0]);
 
-    	        List<FrameworkType> compositeFrameworkTypes = list();
-    	        if (defaultFramework == FrameworkType.DETECT) {
-    	            compositeFrameworkTypes.addAll(FrameworkCalculator.getTypes(rootFolder));
+                List<FrameworkType> compositeFrameworkTypes = list();
+                if (defaultFramework == FrameworkType.DETECT) {
+                    compositeFrameworkTypes.addAll(FrameworkCalculator.getTypes(rootFolder));
                 } else {
-    	            compositeFrameworkTypes.add(defaultFramework);
+                    compositeFrameworkTypes.add(defaultFramework);
                 }
 
                 println("Beginning endpoint detection for '" + rootFolder.getAbsolutePath() + "' with " + compositeFrameworkTypes.size() + " framework types");
@@ -276,10 +276,10 @@ public class EndpointMain {
     }
 
     private static boolean isZipFile(String filePath) {
-    	String ext = FilenameUtils.getExtension(filePath).toLowerCase();
-    	return
-	        ext.equals("zip") ||
-	        ext.equals("war");
+        String ext = FilenameUtils.getExtension(filePath).toLowerCase();
+        return
+            ext.equals("zip") ||
+            ext.equals("war");
     }
 
     private static boolean checkArguments(String[] args) {

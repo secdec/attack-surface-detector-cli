@@ -2,15 +2,15 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-	
-	<groupId>com.github.secdec.astam-correlator</groupId>
+
+    <groupId>com.github.secdec.astam-correlator</groupId>
     <artifactId>attack-surface-detector-cli</artifactId>
     <name>attack-surface-detector-cli</name>
-	<version>1.3.2</version>
-	
+    <version>1.3.2</version>
+
     <description>
         This is a standalone tool that uses the ASTAM Correlator HAM module to detect endpoints from source code for
-		a variety of languages and frameworks. See the readme for more information.
+        a variety of languages and frameworks. See the readme for more information.
     </description>
 
     <packaging>jar</packaging>

@@ -48,11 +48,11 @@ public class EndpointValidation {
                 logger.warn("Got an empty file path for: " + endpoint.toString());
             }
             else if (!endpoint.getFilePath().contains("(lib)")) {
-	            File fullPath = new File(sourceCodeFolder, endpoint.getFilePath());
-	            if (!fullPath.exists()) {
+                File fullPath = new File(sourceCodeFolder, endpoint.getFilePath());
+                if (!fullPath.exists()) {
                     logger.warn("The source code path '" + fullPath.getAbsolutePath() + "' does not exist for: " + endpoint.toString());
-		            return false;
-	            }
+                    return false;
+                }
             }
 
             String serialized;
@@ -151,26 +151,26 @@ public class EndpointValidation {
         }
 
         try {
-	        EndpointStructure testStructure = new EndpointStructure();
-	        testStructure.acceptAllEndpoints(endpoints);
+            EndpointStructure testStructure = new EndpointStructure();
+            testStructure.acceptAllEndpoints(endpoints);
         } catch (Exception e) {
-        	System.out.println("Failed to validate endpoint structure generation due to an exception: \n" + e);
+            System.out.println("Failed to validate endpoint structure generation due to an exception: \n" + e);
         }
 
         return true;
     }
 
     public static boolean validateDuplicates(Collection<Endpoint> endpoints) {
-    	boolean validated = true;
-	    List<List<Endpoint>> duplicateEndpoints = detectDuplicates(endpoints);
-	    if (!duplicateEndpoints.isEmpty()) {
-		    logger.warn("Found " + duplicateEndpoints.size() + " duplicated endpoints:");
-		    for (List<Endpoint> duplicateSet : duplicateEndpoints) {
-			    logger.warn("- " + duplicateSet.size() + ": " + duplicateSet.get(0).toString());
-			    validated = false;
-		    }
-	    }
-	    return validated;
+        boolean validated = true;
+        List<List<Endpoint>> duplicateEndpoints = detectDuplicates(endpoints);
+        if (!duplicateEndpoints.isEmpty()) {
+            logger.warn("Found " + duplicateEndpoints.size() + " duplicated endpoints:");
+            for (List<Endpoint> duplicateSet : duplicateEndpoints) {
+                logger.warn("- " + duplicateSet.size() + ": " + duplicateSet.get(0).toString());
+                validated = false;
+            }
+        }
+        return validated;
     }
 
     private static List<List<Endpoint>> detectDuplicates(Collection<Endpoint> endpoints) {
