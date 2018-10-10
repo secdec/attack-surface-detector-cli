@@ -6,8 +6,7 @@ The `attack-surface-detector-cli` program is a command-line tool that takes in a
 
 This tool supports the following frameworks, as supported by the `threadfix-ham` module:
 
-- ASP.NET MVC
-- ASP.NET Web Forms
+- ASP.NET MVC / Web API / Core / Web Forms
 - Struts
 - Django
 - Ruby on Rails
