@@ -415,7 +415,7 @@ public class EndpointMain {
         line.append(" (");
         line.append(endpoint.getVariants().size());
         line.append(" variants): PARAMETERS=");
-            line.append(endpoint.getParameters());
+        line.append(endpoint.getParameters());
 
         line.append("; FILE=");
         line.append(endpoint.getFilePath());
