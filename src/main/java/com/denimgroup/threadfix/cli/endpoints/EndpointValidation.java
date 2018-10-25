@@ -25,6 +25,7 @@ package com.denimgroup.threadfix.cli.endpoints;
 
 import com.denimgroup.threadfix.data.entities.EndpointStructure;
 import com.denimgroup.threadfix.data.entities.RouteParameter;
+import com.denimgroup.threadfix.data.enums.EndpointRelevanceStrictness;
 import com.denimgroup.threadfix.data.enums.FrameworkType;
 import com.denimgroup.threadfix.data.interfaces.Endpoint;
 import com.denimgroup.threadfix.framework.engine.full.EndpointSerialization;
@@ -46,6 +47,11 @@ public class EndpointValidation {
 
     public static boolean validateSerialization(File sourceCodeFolder, List<Endpoint> endpoints) {
         List<Endpoint> allEndpoints = EndpointUtil.flattenWithVariants(endpoints);
+        List<String> allUrls = list();
+
+        for (Endpoint endpoint : allEndpoints) {
+            allUrls.add(endpoint.getUrlPath());
+        }
 
         try {
             String serializedCollection = EndpointSerialization.serializeAll(allEndpoints);
@@ -74,6 +80,18 @@ public class EndpointValidation {
                 File fullPath = new File(sourceCodeFolder, endpoint.getFilePath());
                 if (!fullPath.exists()) {
                     logger.warn("The source code path '" + fullPath.getAbsolutePath() + "' does not exist for: " + endpoint.toString());
+                    return false;
+                }
+            }
+
+            for (String url : allUrls) {
+                try {
+                    endpoint.isRelevant(url, EndpointRelevanceStrictness.STRICT);
+                    endpoint.isRelevant(url, EndpointRelevanceStrictness.LOOSE);
+                    endpoint.compareRelevance(url);
+                } catch (Exception e) {
+                    logger.warn("Exception occurred while testing relevancy comparisons between [" + url + "] and " + endpoint.toString());
+                    e.printStackTrace();
                     return false;
                 }
             }
