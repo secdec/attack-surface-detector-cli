@@ -288,6 +288,13 @@ public class EndpointMain {
             return false;
         }
 
+        for (String arg : args) {
+            if (arg.equals("-help")) {
+                printHelp();
+                System.exit(0);
+            }
+        }
+
         File rootFile = new File(args[0]);
 
         if (rootFile.exists() && rootFile.isDirectory() || args[0].startsWith("-path-list-file")) {
@@ -360,9 +367,6 @@ public class EndpointMain {
                             }
                         }
                     }
-                } else if (arg.equalsIgnoreCase("-help")) {
-                    printHelp();
-                    System.exit(0);
                 } else {
                     println("Received unsupported option " + arg + ", run with -help to see available flags.");
                     return false;
