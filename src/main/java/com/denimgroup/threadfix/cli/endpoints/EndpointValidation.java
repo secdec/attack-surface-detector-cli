@@ -30,7 +30,8 @@ import com.denimgroup.threadfix.data.enums.FrameworkType;
 import com.denimgroup.threadfix.data.interfaces.Endpoint;
 import com.denimgroup.threadfix.framework.engine.full.EndpointSerialization;
 import com.denimgroup.threadfix.framework.util.EndpointUtil;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,7 +44,7 @@ import static com.denimgroup.threadfix.CollectionUtils.list;
 
 public class EndpointValidation {
 
-    private static Logger logger = Logger.getLogger(EndpointValidation.class);
+    private static Logger logger = LogManager.getLogger(EndpointValidation.class);
 
     public static boolean validateSerialization(File sourceCodeFolder, List<Endpoint> endpoints) {
         List<Endpoint> allEndpoints = EndpointUtil.flattenWithVariants(endpoints);

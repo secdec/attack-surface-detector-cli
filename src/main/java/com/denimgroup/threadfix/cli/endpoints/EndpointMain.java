@@ -38,15 +38,16 @@ import com.denimgroup.threadfix.framework.engine.full.EndpointDatabaseFactory;
 import com.denimgroup.threadfix.framework.engine.full.EndpointSerialization;
 import com.denimgroup.threadfix.framework.engine.full.TemporaryExtractionLocation;
 import com.denimgroup.threadfix.framework.util.EndpointUtil;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.log4j.PatternLayout;
-import org.codehaus.jackson.map.ObjectMapper;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.config.LoggerConfig;
 
 import java.io.*;
 import java.net.UnknownHostException;
@@ -648,18 +649,16 @@ public class EndpointMain {
     }
 
     private static void resetLoggingConfiguration() {
-        ConsoleAppender console = new ConsoleAppender(); //create appender
-        String pattern = "%d [%p|%c|%C{1}] %m%n";
-        console.setLayout(new PatternLayout(pattern));
+        LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+        Configuration config = ctx.getConfiguration();
+        LoggerConfig loggerConfig = config.getLoggerConfig(LogManager.ROOT_LOGGER_NAME);
 
         if (logging == Logging.ON) {
-            console.setThreshold(Level.DEBUG);
+            loggerConfig.setLevel(Level.DEBUG);
         } else {
-            console.setThreshold(Level.ERROR);
+            loggerConfig.setLevel(Level.ERROR);
         }
 
-        console.activateOptions();
-        Logger.getRootLogger().removeAllAppenders();
-        Logger.getRootLogger().addAppender(console);
+        ctx.updateLoggers();
     }
 }
